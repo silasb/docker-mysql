@@ -6,6 +6,8 @@ RUN apt-key adv --keyserver keys.gnupg.net --recv-keys 1C4CBDCDCD2EFD2A && \
     apt-get update && \
     apt-get install -y percona-server-server-5.6 percona-server-client-5.6
 
+ADD templates/etc/mysql/my.cnf /etc/mysql/my.cnf
+
 ADD test /tmp/test
 RUN bats /tmp/test
 
