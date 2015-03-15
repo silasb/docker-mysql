@@ -8,10 +8,9 @@ teardown() {
   service mysql stop
 }
 
-@test "It should install Percona MySQL 5.6" {
+@test "It should install MySQL 5.6" {
   run mysqld --version
   [[ "$output" =~ "Ver 5.6"  ]]
-  [[ "$output" =~ "Percona"  ]]
 }
 
 @test "It should support SSL connections" {
