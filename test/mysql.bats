@@ -27,6 +27,6 @@ teardown() {
 # they appear to be repeated failed connection attempts from the same host.
 # MySQL will eventually block connections from the load balancer if
 # max_connect_errors isn't set high enough.
-  run bash -c 'mysql -Ee "show variables where variable_name = \"max_connect_errors\"" | grep -oP "Value: \K([[:digit:]]+)"'
-  [[ "$output" -ge 10000000 ]]
+  max_connect_errors=$(mysql -Ee "show variables where variable_name = 'max_connect_errors'" | grep Value | awk '{ print $2 }')
+  [[ "$max_connect_errors" -ge 10000000 ]]
 }
