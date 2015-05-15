@@ -30,4 +30,5 @@ VOLUME ["$DATA_DIRECTORY"]
 EXPOSE 3306
 
 ADD run-database.sh /usr/bin/
+ADD utilities.sh /usr/bin/
 ENTRYPOINT ["run-database.sh"]
