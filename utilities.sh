@@ -1,6 +1,6 @@
 #!/bin/bash
 
-parse_url_into_cli_option_string()
+parse_url()
 {
   # cf http://stackoverflow.com/a/17287984
   protocol="$(echo "$1" | grep :// | sed -e's,^\(.*://\).*,\1,g')"
@@ -25,26 +25,4 @@ parse_url_into_cli_option_string()
   fi
 
   database="$(echo $url | grep / | cut -d/ -f2-)"
-
-  options="-h "$host""
-  [ -n "$port" ] && options="$options -P "$port""
-  [ -n "$user" ] && options="$options --user="$user""
-  [ -n "$database" ] && options="$options $database"
-  echo $options
-}
-
-# Note that supplying the password with `--password=...` results in:
-# "Warning: Using a password on the command line interface can be insecure."
-# However, providing the environment variable `$MYSQL_PWD` suppresses the
-# warning. Hence the password extraction is separated here.
-extract_password_from_url()
-{
-  # cf http://stackoverflow.com/a/17287984
-  protocol="$(echo "$1" | grep :// | sed -e's,^\(.*://\).*,\1,g')"
-  # remove the protocol
-  url=$(echo $1 | sed -e s,$protocol,,g)
-  # extract the user and password (if any)
-  user_and_password="$(echo $url | grep @ | cut -d@ -f1)"
-  password="$(echo $user_and_password | grep : | cut -d: -f2)"
-  echo $password
 }
