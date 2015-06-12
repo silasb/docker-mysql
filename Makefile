@@ -1,17 +1,20 @@
 DOCKER = docker
-REPO = quay.io/aptible/mysql
-
-TAG = $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null)
-ifeq ($(TAG), master)
-	TAG = latest
-else ifeq ($(TAG), HEAD)
-	TAG = latest
-endif
+REPO = git@github.com:aptible/docker-mysql.git
+TAGS = 5.6.25
 
 all: release
 
-release: test build
-	$(DOCKER) push $(REPO)
+sync-branches:
+	git fetch $(REPO) master
+	@$(foreach tag, $(TAGS), git branch -f $(tag) FETCH_HEAD;)
+	@$(foreach tag, $(TAGS), git push $(REPO) $(tag);)
+	@$(foreach tag, $(TAGS), git branch -D $(tag);)
 
-build:
-	$(DOCKER) build -t $(REPO):$(TAG) .
+release: $(TAGS)
+	$(DOCKER) push quay.io/aptible/mysql
+
+build: $(TAGS)
+
+.PHONY: $(TAGS)
+$(TAGS):
+	$(DOCKER) build -t quay.io/aptible/mysql:$@ $@

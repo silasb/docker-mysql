@@ -29,7 +29,8 @@ To generate a unique key/certificate pair, you have two options:
 
 ## Available Tags
 
-* `latest`: Currently Percona MySQL 5.6.19
+* `latest`: Currently MySQL 5.6.25 (Community Server)
+* `5.6.25`: MySQL 5.6.25 (Community Server)
 
 ## Tests
 
