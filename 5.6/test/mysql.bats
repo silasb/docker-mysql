@@ -8,9 +8,9 @@ teardown() {
   service mysql stop
 }
 
-@test "It should install MySQL 5.6" {
+@test "It should install MySQL 5.6.25" {
   run mysqld --version
-  [[ "$output" =~ "Ver 5.6"  ]]
+  [[ "$output" =~ "Ver 5.6.25"  ]]
 }
 
 @test "It should support SSL connections" {
