@@ -1,6 +1,6 @@
 DOCKER = docker
 REPO = git@github.com:aptible/docker-mysql.git
-TAGS = 5.6.25
+TAGS = 5.6
 
 all: release
 

@@ -1,6 +1,8 @@
 # ![](https://gravatar.com/avatar/11d3bc4c3163e3d238d558d5c9d98efe?s=64) aptible/mysql
 [![Docker Repository on Quay.io](https://quay.io/repository/aptible/mysql/status)](https://quay.io/repository/aptible/mysql)
 
+[![](http://dockeri.co/image/aptible/mysql)](https://registry.hub.docker.com/u/aptible/mysql/)
+
 MySQL on Docker.
 
 ## Installation and Usage
@@ -30,7 +32,7 @@ To generate a unique key/certificate pair, you have two options:
 ## Available Tags
 
 * `latest`: Currently MySQL 5.6.25 (Community Server)
-* `5.6.25`: MySQL 5.6.25 (Community Server)
+* `5.6`: MySQL 5.6.25 (Community Server)
 
 ## Tests
 
@@ -43,6 +45,12 @@ Tests are run as part of the `Dockerfile` build. To execute them separately with
 To push the Docker image to Quay, run the following command:
 
     make release
+
+## Continuous Integration
+
+Images are built and pushed to Docker Hub on every deploy. Because Quay currently only supports build triggers where the Docker tag name exactly matches a GitHub branch/tag name, we must run the following script to synchronize all our remote branches after a merge to master:
+
+    make sync-branches
 
 ## Copyright and License
 
