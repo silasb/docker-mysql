@@ -6,6 +6,7 @@ setup() {
 
 teardown() {
   service mysql stop
+  while [ -f /var/run/mysqld/mysqld.pid ]; do sleep 0.1; done
 }
 
 @test "It should install MySQL 5.6.25" {
@@ -14,11 +15,18 @@ teardown() {
 }
 
 @test "It should support SSL connections" {
-  skip
+  have_ssl=$(mysql -Ee "show variables where variable_name = 'have_ssl'" | grep Value | awk '{ print $2 }')
+  [[ "$have_ssl" == "YES" ]]
 }
 
-@test "It should require SSL" {
-  skip
+@test "It should be built with OpenSSL support" {
+  have_openssl=$(mysql -Ee "show variables where variable_name = 'have_openssl'" | grep Value | awk '{ print $2 }')
+  [[ "$have_openssl" == "YES" ]]
+}
+
+@test "It should allow connections over SSL" {
+  cipher=$(mysql -Ee "show status like 'Ssl_cipher'" | grep Value | awk '{ print $2 }')
+  [[ "$cipher" == "DHE-RSA-AES256-SHA" ]]
 }
 
 @test "It should set max_connect_errors to a large value" {

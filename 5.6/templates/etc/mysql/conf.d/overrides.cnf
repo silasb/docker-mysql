@@ -17,5 +17,13 @@ expire_logs_days = 10
 max_binlog_size = 100M
 max_connect_errors = 10512000
 
+ssl-ca=/var/db/ssl/ca-cert.pem
+ssl-cert=/var/db/ssl/server-cert.pem
+ssl-key=/var/db/ssl/server-key.pem
+ssl-cipher=DHE-RSA-AES256-SHA:AES128-SHA
+
+[client]
+ssl-cipher=DHE-RSA-AES256-SHA:AES128-SHA
+
 [innodb]
 innodb_flush_method=normal

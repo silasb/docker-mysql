@@ -19,15 +19,40 @@ The first command sets up a data container named `data` which will hold the conf
 
 ### SSL
 
-The MySQL server is configured to enforce SSL for any TCP connection. **Important note:** Because the key and certificate used for SSL negotiation are included in the Docker image, and shared by all Docker clients running the same version of the image, a MySQL server launched with just `docker run` is **NOT** suitable for production.
+The MySQL server is configured to require SSL for any TCP connection that
+authenticates as the `USERNAME` that the database was initialized with. The SSL
+connection relies on a self-signed certficate that is generated when
+`--initialize` is called. Because it's often difficult to force an SSL
+connection from some clients, we also create another user with a `-nossl` suffix
+that allows but does not require SSL. For example, if you pass
+`USERNAME=aptible` to the database `--initialize` call, an `aptible` user is
+created that requires SSL over TCP and an `aptible-nossl` user is created that
+does not require SSL over TCP.
 
-To generate a unique key/certificate pair, you have two options:
+When you connect via the `--client` flag using the Docker image, SSL is forced.
+Connecting from other clients or from the `mysql` command line utility involves
+setting various
+[ssl flags](https://dev.mysql.com/doc/refman/5.6/en/ssl-options.html) and it's
+sometimes unclear which are mandatory and what configuration is implied by
+different combinations of flags. The simplest way to force SSL from a client is
+to set the `ssl-cipher` parameter. This Docker image supports
+`DHE-RSA-AES256-SHA` and `AES128-SHA`.
 
-1. Build directly from the Dockerfile, disabling caching:
+When using an untested client to connect, you should always verify that the
+connection parameters you've supplied forces an SSL connection by inspecting
+the session's `Ssl_cipher` status variable, for example:
 
-        docker build --no-cache .
+```
+mysql> show status like 'Ssl_cipher';
++---------------+--------------------+
+| Variable_name | Value              |
++---------------+--------------------+
+| Ssl_cipher    | DHE-RSA-AES256-SHA |
++---------------+--------------------+
+1 row in set (0.02 sec)
+```
 
-2. Initialize a new key and certificate in the host volume and mount that directory into the Docker container.
+This status variable is non-empty exactly when SSL is enabled for the session.
 
 ## Available Tags
 
