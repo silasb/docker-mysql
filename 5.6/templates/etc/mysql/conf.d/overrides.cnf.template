@@ -1,6 +1,6 @@
 [mysqld]
 bind-address = 0.0.0.0
-datadir = /var/db
+datadir = DATA_DIRECTORY
 skip-external-locking
 
 key_buffer_size = 16M
@@ -17,9 +17,9 @@ expire_logs_days = 10
 max_binlog_size = 100M
 max_connect_errors = 10512000
 
-ssl-ca=/var/db/ssl/ca-cert.pem
-ssl-cert=/var/db/ssl/server-cert.pem
-ssl-key=/var/db/ssl/server-key.pem
+ssl-ca=DATA_DIRECTORY/ssl/ca-cert.pem
+ssl-cert=DATA_DIRECTORY/ssl/server-cert.pem
+ssl-key=DATA_DIRECTORY/ssl/server-key.pem
 ssl-cipher=DHE-RSA-AES256-SHA:AES128-SHA
 
 [client]

@@ -1,12 +1,21 @@
 #!/usr/bin/env bats
 
 setup() {
-  service mysql start
+  export OLD_DATA_DIRECTORY="$DATA_DIRECTORY"
+  export DATA_DIRECTORY=/tmp/datadir
+  mkdir "$DATA_DIRECTORY"
+  /usr/bin/run-database.sh --initialize
+  while [ -f /var/run/mysqld/mysqld.pid ]; do sleep 0.1; done
+  /usr/bin/run-database.sh > /tmp/mysql.log 2>&1 &
+  until mysqladmin ping; do sleep 0.1; done
 }
 
 teardown() {
-  service mysql stop
+  mysqladmin shutdown
   while [ -f /var/run/mysqld/mysqld.pid ]; do sleep 0.1; done
+  rm -rf "$DATA_DIRECTORY"
+  export DATA_DIRECTORY="$OLD_DATA_DIRECTORY"
+  unset OLD_DATA_DIRECTORY
 }
 
 @test "It should install MySQL 5.6.25" {

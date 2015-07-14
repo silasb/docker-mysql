@@ -3,6 +3,8 @@
 . /usr/bin/utilities.sh
 
 if [[ "$1" == "--initialize" ]]; then
+  sed "s:DATA_DIRECTORY:${DATA_DIRECTORY}:g" /etc/mysql/conf.d/overrides.cnf.template > /etc/mysql/conf.d/overrides.cnf
+
   mkdir -p "$DATA_DIRECTORY/ssl"
   cd "$DATA_DIRECTORY/ssl"
   # All of these certificates need to be generated and signed in the past.
@@ -22,14 +24,14 @@ if [[ "$1" == "--initialize" ]]; then
 
   mysql_install_db --user=mysql -ldata="$DATA_DIRECTORY"
 
-  service mysql start
+  mysqld_safe --ssl &
   until nc -z localhost 3306; do sleep 0.1; done
 
   mysql -e "GRANT ALL ON *.* to 'root'@'%' IDENTIFIED BY '$PASSPHRASE'"
   mysql -e "GRANT ALL ON ${DATABASE:-db}.* to '${USERNAME:-aptible}-nossl'@'%' IDENTIFIED BY '$PASSPHRASE'"
   mysql -e "GRANT ALL ON ${DATABASE:-db}.* to '${USERNAME:-aptible}'@'%' IDENTIFIED BY '$PASSPHRASE' REQUIRE SSL"
   mysql -e "CREATE DATABASE ${DATABASE:-db}"
-  service mysql stop
+  mysqladmin shutdown
 
 elif [[ "$1" == "--client" ]]; then
   [ -z "$2" ] && echo "docker run -it aptible/mysql --client mysql://..." && exit

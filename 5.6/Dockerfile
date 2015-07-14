@@ -24,11 +24,9 @@ RUN mkdir -p "$DATA_DIRECTORY" && chown -R mysql:mysql "$DATA_DIRECTORY"
 
 ADD run-database.sh /usr/bin/
 ADD utilities.sh /usr/bin/
-ADD test /tmp/test
 
-RUN /usr/bin/run-database.sh --initialize && \
-    bats /tmp/test && \
-    rm -rf "$DATA_DIRECTORY"/*
+ADD test /tmp/test
+RUN bats /tmp/test
 
 VOLUME ["$DATA_DIRECTORY"]
 EXPOSE 3306
