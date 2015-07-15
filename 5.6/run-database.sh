@@ -2,9 +2,9 @@
 
 . /usr/bin/utilities.sh
 
-if [[ "$1" == "--initialize" ]]; then
-  sed "s:DATA_DIRECTORY:${DATA_DIRECTORY}:g" /etc/mysql/conf.d/overrides.cnf.template > /etc/mysql/conf.d/overrides.cnf
+sed "s:DATA_DIRECTORY:${DATA_DIRECTORY}:g" /etc/mysql/conf.d/overrides.cnf.template > /etc/mysql/conf.d/overrides.cnf
 
+if [[ "$1" == "--initialize" ]]; then
   mkdir -p "$DATA_DIRECTORY/ssl"
   cd "$DATA_DIRECTORY/ssl"
   # All of these certificates need to be generated and signed in the past.
