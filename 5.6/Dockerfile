@@ -8,6 +8,7 @@ ADD templates/etc/apt/sources.list.d /etc/apt/sources.list.d
 RUN apt-key adv --keyserver pool.sks-keyservers.net --recv-keys 5072E1F5 && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        faketime \
         netcat \
         perl \
         procps \
@@ -21,14 +22,13 @@ ADD templates/etc/mysql /etc/mysql
 ENV DATA_DIRECTORY /var/db
 RUN mkdir -p "$DATA_DIRECTORY" && chown -R mysql:mysql "$DATA_DIRECTORY"
 
+ADD run-database.sh /usr/bin/
+ADD utilities.sh /usr/bin/
+
 ADD test /tmp/test
-RUN mysql_install_db --user=mysql -ldata="$DATA_DIRECTORY" && \
-    bats /tmp/test && \
-    rm -rf "$DATA_DIRECTORY"/*
+RUN bats /tmp/test
 
 VOLUME ["$DATA_DIRECTORY"]
 EXPOSE 3306
 
-ADD run-database.sh /usr/bin/
-ADD utilities.sh /usr/bin/
 ENTRYPOINT ["run-database.sh"]

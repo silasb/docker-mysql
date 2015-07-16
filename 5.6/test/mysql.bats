@@ -1,11 +1,21 @@
 #!/usr/bin/env bats
 
 setup() {
-  service mysql start
+  export OLD_DATA_DIRECTORY="$DATA_DIRECTORY"
+  export DATA_DIRECTORY=/tmp/datadir
+  mkdir "$DATA_DIRECTORY"
+  /usr/bin/run-database.sh --initialize
+  while [ -f /var/run/mysqld/mysqld.pid ]; do sleep 0.1; done
+  /usr/bin/run-database.sh > /tmp/mysql.log 2>&1 &
+  until mysqladmin ping; do sleep 0.1; done
 }
 
 teardown() {
-  service mysql stop
+  mysqladmin shutdown
+  while [ -f /var/run/mysqld/mysqld.pid ]; do sleep 0.1; done
+  rm -rf "$DATA_DIRECTORY"
+  export DATA_DIRECTORY="$OLD_DATA_DIRECTORY"
+  unset OLD_DATA_DIRECTORY
 }
 
 @test "It should install MySQL 5.6.25" {
@@ -14,11 +24,18 @@ teardown() {
 }
 
 @test "It should support SSL connections" {
-  skip
+  have_ssl=$(mysql -Ee "show variables where variable_name = 'have_ssl'" | grep Value | awk '{ print $2 }')
+  [[ "$have_ssl" == "YES" ]]
 }
 
-@test "It should require SSL" {
-  skip
+@test "It should be built with OpenSSL support" {
+  have_openssl=$(mysql -Ee "show variables where variable_name = 'have_openssl'" | grep Value | awk '{ print $2 }')
+  [[ "$have_openssl" == "YES" ]]
+}
+
+@test "It should allow connections over SSL" {
+  cipher=$(mysql -Ee "show status like 'Ssl_cipher'" | grep Value | awk '{ print $2 }')
+  [[ "$cipher" == "DHE-RSA-AES256-SHA" ]]
 }
 
 @test "It should set max_connect_errors to a large value" {
