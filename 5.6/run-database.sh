@@ -41,12 +41,16 @@ elif [[ "$1" == "--client" ]]; then
 elif [[ "$1" == "--dump" ]]; then
   [ -z "$2" ] && echo "docker run aptible/mysql --dump mysql://... > dump.sql" && exit
   parse_url "$2"
-  MYSQL_PWD="$password" mysqldump --host="$host" --port="$port" --user="$user" "$database" --ssl
+  # If the file /dump-output exists, write output there. Otherwise, use stdout.
+  [ -e /dump-output ] && exec 3>/dump-output || exec 3>&1
+  MYSQL_PWD="$password" mysqldump --host="$host" --port="$port" --user="$user" "$database" --ssl >&3
 
 elif [[ "$1" == "--restore" ]]; then
   [ -z "$2" ] && echo "docker run -i aptible/mysql --restore mysql://... < dump.sql" && exit
   parse_url "$2"
-  MYSQL_PWD="$password" mysql --host="$host" --port="$port" --user="$user" "$database" --ssl
+  # If the file /restore-input exists, read input there. Otherwise, use stdin.
+  [ -e /restore-input ] && exec 3</restore-input || exec 3<&0
+  MYSQL_PWD="$password" mysql --host="$host" --port="$port" --user="$user" "$database" --ssl <&3
 
 elif [[ "$1" == "--readonly" ]]; then
   echo "Starting MySQL in read-only mode..."

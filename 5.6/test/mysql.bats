@@ -47,3 +47,47 @@ teardown() {
   max_connect_errors=$(mysql -Ee "show variables where variable_name = 'max_connect_errors'" | grep Value | awk '{ print $2 }')
   [[ "$max_connect_errors" -ge 10000000 ]]
 }
+
+@test "It should dump to stdout by default" {
+  run /usr/bin/run-database.sh --dump mysql://root@localhost/db
+  [ "$status" -eq "0" ]
+  [[ "${lines[0]}" =~ "-- MySQL dump 10.13" ]]
+  [[ "${lines[-1]}" =~ "-- Dump completed" ]]
+}
+
+@test "It should restore from stdin by default" {
+  /usr/bin/run-database.sh --dump mysql://root@localhost/db > /tmp/restore-test
+  echo "CREATE TABLE foo (i int);" >> /tmp/restore-test
+  echo "INSERT INTO foo VALUES (1);" >> /tmp/restore-test
+  run /usr/bin/run-database.sh --restore mysql://root@localhost/db < /tmp/restore-test
+  [ "$status" -eq "0" ]
+  rm /tmp/restore-test
+  run mysql -Ee "SELECT * FROM foo" db
+  [ "$status" -eq "0" ]
+  [ "${lines[1]}" = "i: 1" ]
+  [ "${#lines[@]}" = "2" ]
+}
+
+@test "It should dump to /dump-output if /dump-output exists" {
+  touch /dump-output
+  run /usr/bin/run-database.sh --dump mysql://root@localhost/db
+  [ "$status" -eq "0" ]
+  [ "$output" = "" ]
+  run cat dump-output
+  rm /dump-output
+  [[ "${lines[0]}" =~ "-- MySQL dump 10.13" ]]
+  [[ "${lines[-1]}" =~ "-- Dump completed" ]]
+}
+
+@test "It should restore from /restore-input if /restore-input exists" {
+  /usr/bin/run-database.sh --dump mysql://root@localhost/db > /restore-input
+  echo "CREATE TABLE foo (i int);" >> /restore-input
+  echo "INSERT INTO foo VALUES (1);" >> /restore-input
+  run /usr/bin/run-database.sh --restore mysql://root@localhost/db
+  [ "$status" -eq "0" ]
+  rm /restore-input
+  run mysql -Ee "SELECT * FROM foo" db
+  [ "$status" -eq "0" ]
+  [ "${lines[1]}" = "i: 1" ]
+  [ "${#lines[@]}" = "2" ]
+}
