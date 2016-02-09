@@ -27,7 +27,7 @@ if [[ "$1" == "--initialize" ]]; then
   mysqld_safe --ssl &
   until nc -z localhost 3306; do sleep 0.1; done
 
-  mysql -e "GRANT ALL ON *.* to 'root'@'%' IDENTIFIED BY '$PASSPHRASE'"
+  mysql -e "GRANT ALL ON *.* to 'root'@'%' IDENTIFIED BY '$PASSPHRASE' WITH GRANT OPTION"
   mysql -e "GRANT ALL ON ${DATABASE:-db}.* to '${USERNAME:-aptible}-nossl'@'%' IDENTIFIED BY '$PASSPHRASE'"
   mysql -e "GRANT ALL ON ${DATABASE:-db}.* to '${USERNAME:-aptible}'@'%' IDENTIFIED BY '$PASSPHRASE' REQUIRE SSL"
   mysql -e "CREATE DATABASE ${DATABASE:-db}"
